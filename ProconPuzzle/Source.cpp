@@ -1,51 +1,42 @@
 #include<stdio.h>
 #include<iostream>
-
 //TODO:opencv2は?
 #include <opencv/cv.hpp>
 //TODO:必要なの?
 #include <opencv/cxcore.hpp>
 //TODO:必要なの?
 #include <opencv/highgui.h>
+//TODO:必要なの?
+#include <opencv2/opencv.hpp>
+
+#include"input_processor.h"
 
 using namespace std;
 using namespace cv;
 
 int main(){
-	Mat src_img = imread("pzl.png");
+	input_processor inp;
+	while(true){
+		vector<Mat> pieces = inp.find_pieces();
 
-	Mat gray_srcimg;
-	cvtColor(src_img, gray_srcimg, CV_BGR2GRAY);
-
-	medianBlur(gray_srcimg, gray_srcimg, 3);
-
-	Mat bin_img;
-	Canny(gray_srcimg, bin_img, 200, 300);
-
-	vector<vector<Point>> contours;
-	findContours(bin_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-	Mat result_img(bin_img.size(), CV_8UC3, Scalar(255, 255, 255));
-	int piece_counter = 0;
-	for(int i = 0; i < contours.size(); ++i){
-		Rect piece_rect = boundingRect(contours[i]);
-		if(piece_rect.area() > 900 && piece_rect.area() < 10000){
-			drawContours(result_img, contours, i, Scalar(0, 0, 0), -1);
-			rectangle(result_img, piece_rect, Scalar(255, 0, 0));
-
-			String label_text = to_string(piece_counter);
-			putText(result_img, label_text, Point(piece_rect.x, piece_rect.y), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0), 1, CV_AA);
-			piece_counter++;
+		Mat resultimg(100, 1000, CV_8UC3);
+		int x = 0;
+		for(int i = 0; i < pieces.size(); ++i){
+			//Mat roi1(resultimg, Rect(0, 0, pieces[i].cols, pieces[i].rows));
+			//pieces[i].copyTo(roi1);
+			Mat mat = (Mat_<double>(2, 3) << 1.0, 0.0, x, 0.0, 1.0, 0);
+			warpAffine(pieces[i], resultimg, mat, resultimg.size(), CV_INTER_LINEAR, BORDER_TRANSPARENT);
+			x += pieces[i].cols;
 		}
+		namedWindow("hntykr", CV_WINDOW_AUTOSIZE);
+		imshow("hntykr", resultimg);
+		waitKey(1);
 	}
 
-	namedWindow("hntykr", CV_WINDOW_AUTOSIZE);
-	imshow("hntykr", result_img);
+	//vector<int> compression_params;
+	//compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	//compression_params.push_back(50);
+	//imwrite("res.png", pieces[0]);// , compression_params);
 
-	vector<int> compression_params;
-	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-	compression_params.push_back(50);
-	imwrite("res.png", result_img);// , compression_params);
-
-	waitKey();
 	destroyAllWindows();
 }
