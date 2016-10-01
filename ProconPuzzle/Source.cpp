@@ -28,8 +28,8 @@ int main(){
 			warpAffine(pieces[i], resultimg, mat, resultimg.size(), CV_INTER_LINEAR, BORDER_TRANSPARENT);
 			x += pieces[i].cols;
 		}
-		namedWindow("hntykr", CV_WINDOW_AUTOSIZE);
-		imshow("hntykr", resultimg);
+		namedWindow("検出されたピース", CV_WINDOW_AUTOSIZE);
+		imshow("検出されたピース", resultimg);
 		waitKey(1);
 	}
 

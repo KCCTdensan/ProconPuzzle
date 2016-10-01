@@ -7,6 +7,11 @@ input_processor::input_processor(){
 	USBcamera.set(CV_CAP_PROP_FRAME_HEIGHT, 720);
 }
 
+int canny_arg1 = 200;
+int canny_arg2 = 300;
+int min_piece_area = 900;
+int max_piece_area = 10000;
+
 vector<Mat> input_processor::find_pieces(Mat src_img){
 	vector<Mat> pieces;
 
@@ -16,7 +21,7 @@ vector<Mat> input_processor::find_pieces(Mat src_img){
 	medianBlur(gray_srcimg, gray_srcimg, 3);
 
 	Mat bin_img;
-	Canny(gray_srcimg, bin_img, 200, 300);//HACK:マジックナンバー
+	Canny(gray_srcimg, bin_img, canny_arg1, canny_arg2);
 	Mat bin_img2 = bin_img.clone();
 
 	vector<vector<Point>> contours;
@@ -25,12 +30,13 @@ vector<Mat> input_processor::find_pieces(Mat src_img){
 	int piece_counter = 0;
 	for(int i = 0; i < contours.size(); ++i){
 		Rect piece_rect = boundingRect(contours[i]);
-		if(piece_rect.area() > 900 && piece_rect.area() < 10000){//HACK:マジックナンバー
-			Mat cut_img(piece_rect.size(), CV_8U);
-			drawContours(cut_img, contours, i, Scalar(0), CV_FILLED, 8, noArray(), 0, Point(-piece_rect.x, -piece_rect.y));
+		if(piece_rect.area() > min_piece_area && piece_rect.area() < max_piece_area){
+			Mat cut_img(gray_srcimg, piece_rect);
+			threshold(cut_img, cut_img, 0, 255, THRESH_BINARY | THRESH_OTSU);
 			pieces.push_back(cut_img);
 
-			drawContours(result_img, contours, i, Scalar(0, 0, 0), CV_FILLED);
+			Mat mat = (cv::Mat_<double>(2, 3) << 1.0, 0.0, piece_rect.x, 0.0, 1.0, piece_rect.y);
+			cv::warpAffine(cut_img, result_img, mat, result_img.size(), CV_INTER_LINEAR, cv::BORDER_TRANSPARENT);
 			rectangle(result_img, piece_rect, Scalar(255, 0, 0));
 
 			String label_text = to_string(piece_counter);
@@ -38,10 +44,15 @@ vector<Mat> input_processor::find_pieces(Mat src_img){
 			piece_counter++;
 		}
 	}
-	namedWindow("hntykr2", CV_WINDOW_AUTOSIZE);
-	imshow("hntykr2", result_img);
-	namedWindow("hntykr3", CV_WINDOW_AUTOSIZE);
-	imshow("hntykr3", bin_img2);
+	//HACK:何度も作る事になる?
+	namedWindow("輪郭抽出", CV_WINDOW_AUTOSIZE);
+	imshow("輪郭抽出", result_img);
+	namedWindow("二値化画像", CV_WINDOW_AUTOSIZE);
+	imshow("二値化画像", bin_img2);
+	createTrackbar("Canny_arg_1", "二値化画像", &canny_arg1, 1000);
+	createTrackbar("Canny_arg_2", "二値化画像", &canny_arg2, 1000);
+	createTrackbar("min_piece_area", "輪郭抽出", &min_piece_area, 20000);
+	createTrackbar("max_piece_area", "輪郭抽出", &max_piece_area, 20000);
 
 	return pieces;
 }
@@ -50,9 +61,21 @@ vector<Mat> input_processor::find_pieces(){
 	if(!USBcamera.isOpened()){
 		CV_Error(Error::StsError, "The USBcamera is not available.");
 	}
-	Mat img;
-	USBcamera >> img;
-	return find_pieces(img);
+	Mat camera_img;
+	namedWindow("カメラプレビュー", CV_WINDOW_AUTOSIZE);
+	vector<Mat> pieces;
+	while(true){
+		USBcamera >> camera_img;
+		imshow("カメラプレビュー", camera_img);
+		int key_input = waitKey(1);
+		vector<Mat> got_pieces = find_pieces(camera_img);//TODO:破棄する物をわざわざ作ってるのでちょっとアレ
+		if(key_input == 't'){//[T]ake a picture
+			pieces.insert(pieces.end(), got_pieces.begin(), got_pieces.end());
+		} else if(key_input == 'e'){//[E]xit
+			break;
+		}
+	}
+	return pieces;
 }
 
 vector<Mat> input_processor::find_pieces(String file_path){
