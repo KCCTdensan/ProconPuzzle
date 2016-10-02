@@ -13,16 +13,23 @@
 using namespace std;
 using namespace cv;
 
+struct piece_info{
+	Mat bin_img;
+	vector<Point> corners;
+};
+
 class input_processor{
 public:
 	input_processor();
 
 	//USBカメラからピースを取得
-	vector<Mat> find_pieces();
+	vector<piece_info> find_pieces();
 
 	//画像ファイルからピースを取得
-	vector<Mat> find_pieces(String file_path);
+	vector<piece_info> find_pieces(String file_path);
+
 private:
 	VideoCapture USBcamera;
-	vector<Mat> find_pieces(Mat);
+	vector<piece_info>find_pieces(Mat);
+	vector<piece_info>find_frame(Mat);
 };
