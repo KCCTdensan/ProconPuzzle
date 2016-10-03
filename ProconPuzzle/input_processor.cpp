@@ -25,7 +25,7 @@ vector<piece_info> input_processor::find_pieces(Mat src_img){
 	Mat gray_srcimg;
 	cvtColor(src_img, gray_srcimg, CV_BGR2GRAY);
 
-	medianBlur(gray_srcimg, gray_srcimg, 3);
+	//medianBlur(gray_srcimg, gray_srcimg, 3);
 
 	Mat bin_img;
 	Canny(gray_srcimg, bin_img, canny_arg1, canny_arg2);
@@ -66,8 +66,8 @@ vector<piece_info> input_processor::find_pieces(Mat src_img){
 	imshow("“ñ’l‰»‰æ‘œ", bin_img2);
 	createTrackbar("Canny_arg_1", "“ñ’l‰»‰æ‘œ", &canny_arg1, 1000);
 	createTrackbar("Canny_arg_2", "“ñ’l‰»‰æ‘œ", &canny_arg2, 1000);
-	createTrackbar("min_piece_area", "—ÖŠs’Šo", &min_piece_area, 20000);
-	createTrackbar("max_piece_area", "—ÖŠs’Šo", &max_piece_area, 20000);
+	createTrackbar("min_piece_area", "—ÖŠs’Šo", &min_piece_area, 150000);
+	createTrackbar("max_piece_area", "—ÖŠs’Šo", &max_piece_area, 150000);
 	createTrackbar("corner_detect_threshold_rate", "—ÖŠs’Šo", &corner_detect_threshold_rate, 200);
 
 	return pieces;
