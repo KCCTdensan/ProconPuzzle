@@ -17,6 +17,7 @@ using namespace cv;
 int main(){
 	input_processor inp;
 	while(true){
+		piece_info frame = inp.find_frame();
 		vector<piece_info> pieces = inp.find_pieces();
 
 		Mat resultimg(100, 1000, CV_8UC3);

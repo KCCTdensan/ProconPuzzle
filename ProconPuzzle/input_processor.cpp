@@ -13,13 +13,64 @@ int min_piece_area = 900;
 int max_piece_area = 10000;
 int corner_detect_threshold_rate = 50;
 
-vector<piece_info> input_processor::find_frame(Mat src_img){
-	//UNDONE:
-	vector<piece_info> a;
-	return  a;
+piece_info input_processor::find_frame() {
+	piece_info pieces;
+	while (true) {
+		Mat src_img;
+		USBcamera >> src_img;
+
+
+		Mat gray_srcimg;
+		cvtColor(src_img, gray_srcimg, CV_BGR2GRAY);
+
+		//medianBlur(gray_srcimg, gray_srcimg, 3);
+
+		Mat bin_img;
+		Canny(gray_srcimg, bin_img, canny_arg1, canny_arg2);
+		Mat bin_img2 = bin_img.clone();
+
+		vector<vector<Point>> contours;
+		vector<Vec4i> hierarchy;
+		findContours(bin_img, contours,hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+		Mat result_img(bin_img.size(), CV_8UC3, Scalar(255, 255, 255));
+		if (contours.size() >= 2) {
+			Rect piece_rect = boundingRect(contours[1]);
+			if (piece_rect.area() > min_piece_area) {
+				Mat cut_img(gray_srcimg, piece_rect);
+				threshold(cut_img, cut_img, 0, 255, THRESH_BINARY | THRESH_OTSU);
+				piece_info pi;
+				pi.bin_img = cut_img;
+				pi.corners = contours[1];
+				pieces = pi;
+
+				Mat mat = (Mat_<double>(2, 3) << 1.0, 0.0, piece_rect.x, 0.0, 1.0, piece_rect.y);
+				warpAffine(cut_img, result_img, mat, result_img.size(), CV_INTER_LINEAR, BORDER_TRANSPARENT);
+				rectangle(result_img, piece_rect, Scalar(255, 0, 0));
+
+				approxPolyDP(contours[1], contours[1], std::min(piece_rect.width, piece_rect.height)*corner_detect_threshold_rate / 100, true);
+				for (int tpp = 0; tpp < contours[1].size(); ++tpp) {
+					rectangle(result_img, Rect(contours[1][tpp].x, contours[1][tpp].y, 10, 10), Scalar(128));
+				}
+			}
+		}
+		//HACK:何度も作る事になる?
+		namedWindow("フレーム輪郭抽出", CV_WINDOW_AUTOSIZE);
+		imshow("フレーム輪郭抽出", result_img);
+		namedWindow("フレーム二値化画像", CV_WINDOW_AUTOSIZE);
+		imshow("フレーム二値化画像", bin_img2);
+		createTrackbar("Canny_arg_1", "フレーム二値化画像", &canny_arg1, 1000);
+		createTrackbar("Canny_arg_2", "フレーム二値化画像", &canny_arg2, 1000);
+		createTrackbar("min_piece_area", "フレーム輪郭抽出", &min_piece_area, 250000);
+		createTrackbar("corner_detect_threshold_rate", "フレーム輪郭抽出", &corner_detect_threshold_rate, 200);
+		int key_input = waitKey(1);
+		if (key_input == 't') {
+			break;
+		}
+	}
+	return pieces;
 }
 
-vector<piece_info> input_processor::find_pieces(Mat src_img){
+vector<piece_info> input_processor::find_pieces(Mat src_img) {
 	vector<piece_info> pieces;
 
 	Mat gray_srcimg;

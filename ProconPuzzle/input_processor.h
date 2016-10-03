@@ -28,8 +28,8 @@ public:
 	//画像ファイルからピースを取得
 	vector<piece_info> find_pieces(String file_path);
 
+	piece_info find_frame();
 private:
 	VideoCapture USBcamera;
 	vector<piece_info>find_pieces(Mat);
-	vector<piece_info>find_frame(Mat);
 };
