@@ -84,6 +84,8 @@ piece_info input_processor::find_frame() {
 			break;
 		}
 	}
+	destroyWindow("フレーム輪郭抽出");
+	destroyWindow("フレーム二値化画像");
 	return pieces;
 }
 
@@ -161,6 +163,8 @@ vector<piece_info> input_processor::find_pieces(){
 			break;
 		}
 	}
+	destroyWindow("輪郭抽出");
+	destroyWindow("二値化画像");
 	return pieces;
 }
 
