@@ -25,9 +25,13 @@ public:
 	//USBカメラからピースを取得
 	vector<piece_info> find_pieces();
 
-	//画像ファイルからピースを取得
+	//画像ファイルからピースを取得(デバッグに便利)
 	vector<piece_info> find_pieces(String file_path);
 
+	//くっつけた『『『白黒』』』のピース画像から輪郭の情報を得る
+	vector<Point> input_processor::findcontour_from_merged_img(Mat marged_bin_img);
+
+	//枠情報を取得
 	piece_info find_frame();
 private:
 	VideoCapture USBcamera;

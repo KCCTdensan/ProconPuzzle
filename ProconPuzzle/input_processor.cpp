@@ -16,6 +16,18 @@ int min_piece_area = 900;
 int max_piece_area = 10000;
 int corner_detect_threshold_rate = 50;
 
+vector<Point> input_processor::findcontour_from_merged_img(Mat marged_bin_img){
+		Mat bin_img;
+		Canny(marged_bin_img, bin_img, 0, 0);//HACK:è„éËÇ≠çsÇ©Ç»Ç¢Ç©Ç‡
+		vector<vector<Point>> contours;
+		findContours(bin_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		//approxPolyDP(contours[0], contours[0], std::min(marged_bin_img.cols, marged_bin_img.rows) * 1 / 100, true);
+		approxPolyDP(contours[0], contours[0], arcLength(contours[0], true) / contours[0].size()*2.5, true);//HACK:
+
+		return contours[0];
+}
+
 piece_info input_processor::find_frame() {
 	piece_info pieces;
 	while (true) {
