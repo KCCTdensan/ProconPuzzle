@@ -7,8 +7,9 @@ Source.cppはそのデモ．
 
 インスタンスを作った時にUSBカメラを使う準備を自動的に行う．
 
-`find_pieces()`はUSBカメラの入力を元に二値化されたピース`bin_img`，コーナーの座標のvector`corners`を含む`piece_info`構造体のvectorを返す．  
-引数に画像ファイルのパスを使う事も出来る．
+`find_pieces()`はUSBカメラの入力を元に二値化されたピース`bin_img`，コーナーの座標のvector`corners`を含む`piece_info`構造体のvectorを返す．この関数のみ引数に画像ファイルのパスを使う事も出来る．  
+`find_frame()`でUSBカメラの入力を元に枠の情報を返す．  
+`findcontour_from_merged_img(Mat)`でピースの輪郭を取得．結合したピースに使う事を想定．白黒画像を渡す．
 
 ### 操作
 * Tキー *T*ake a picture ピースを追加
