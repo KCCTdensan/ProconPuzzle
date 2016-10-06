@@ -44,6 +44,9 @@ piece_info input_processor::find_frame() {
 		Canny(gray_srcimg, bin_img, canny_arg1, canny_arg2);
 		Mat bin_img2 = bin_img.clone();
 
+		//dilate(bin_img, bin_img, Mat(), Point(-1, -1), 1);
+		//erode(bin_img, bin_img, Mat(), Point(-1, -1), 1);
+
 		vector<vector<Point>> contours;
 		findContours(bin_img, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 		Mat result_img(bin_img.size(), CV_8UC3, Scalar(255, 255, 255));
@@ -101,6 +104,9 @@ piece_info input_processor::find_frame() {
 	return pieces;
 }
 
+int picture_n;
+Mat save_image;//HACK:最早仕方ない
+
 vector<piece_info> input_processor::find_pieces(Mat src_img) {
 	vector<piece_info> pieces;
 
@@ -141,6 +147,10 @@ vector<piece_info> input_processor::find_pieces(Mat src_img) {
 			piece_counter++;
 		}
 	}
+
+	save_image = result_img;
+
+
 	//HACK:何度も作る事になる?
 	namedWindow("輪郭抽出", CV_WINDOW_AUTOSIZE);
 	imshow("輪郭抽出", result_img);
@@ -162,6 +172,7 @@ vector<piece_info> input_processor::find_pieces(){
 	Mat camera_img;
 	namedWindow("カメラプレビュー", CV_WINDOW_AUTOSIZE);
 	vector<piece_info> pieces;
+	picture_n = 0;
 	while(true){
 		USBcamera >> camera_img;
 		imshow("カメラプレビュー", camera_img);
@@ -169,6 +180,8 @@ vector<piece_info> input_processor::find_pieces(){
 		vector<piece_info> got_pieces = find_pieces(camera_img);//TODO:破棄する物をわざわざ作ってるのでちょっとアレ
 		if(key_input == 't'){//[T]ake a picture
 			pieces.insert(pieces.end(), got_pieces.begin(), got_pieces.end());
+			imwrite(to_string(picture_n) + ".png", save_image);
+			picture_n++;
 		} else if(key_input == 'f'){//[F]rame
 
 		} else if(key_input == 'e'){//[E]xit
