@@ -1,6 +1,3 @@
-#include<stdio.h>
-#include<iostream>
-
 #include"input_processor.h"
 
 using namespace std;
@@ -12,7 +9,7 @@ int main(){
 		piece_info frame = inp.find_frame();
 		vector<piece_info> pieces = inp.find_pieces();
 
-		Mat resultimg(100, 1500, CV_8UC3);
+		Mat resultimg(100, 1500, CV_8UC3);//HACK:magic number
 		int x = 0;
 		for(int i = 0; i < pieces.size(); ++i){
 			//Mat roi1(resultimg, Rect(0, 0, pieces[i].cols, pieces[i].rows));
