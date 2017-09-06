@@ -34,7 +34,6 @@ piece_info input_processor::find_frame() {
 		Mat src_img;
 		USBcamera >> src_img;
 
-
 		Mat gray_srcimg;
 		cvtColor(src_img, gray_srcimg, CV_BGR2GRAY);
 
@@ -171,6 +170,7 @@ vector<piece_info> input_processor::find_pieces(){
 	}
 	Mat camera_img;
 	namedWindow("カメラプレビュー", CV_WINDOW_AUTOSIZE);
+	imshow("カメラプレビュー", camera_img);
 	vector<piece_info> pieces;
 	picture_n = 0;
 	while(true){
